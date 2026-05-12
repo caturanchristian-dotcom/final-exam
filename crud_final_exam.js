@@ -68,6 +68,17 @@ async function initDb() {
     }
 }
 
+// --- Auth API ---
+app.post('/api/login', (req, res) => {
+    const { username, password } = req.body;
+    // Hardcoded for internal practical exam simulation
+    if (username === 'admin' && password === 'admin123') {
+        res.json({ success: true, message: 'Authentication successful', token: 'sims-session-token-primary' });
+    } else {
+        res.status(401).json({ success: false, message: 'Invalid credentials access denied' });
+    }
+});
+
 // --- CRUD API Routes ---
 
 // Create Student

@@ -10,6 +10,7 @@ const tableBody = document.getElementById('student-table-body');
 const studentForm = document.getElementById('student-form');
 const searchInput = document.getElementById('search-input');
 const toastEl = document.getElementById('toast');
+const loginForm = document.getElementById('login-form');
 
 // Views mapping
 const views = {
@@ -21,17 +22,81 @@ const views = {
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
-    fetchStudents();
-    showView('dashboard');
+    checkAuth();
     
     // Search Listener
-    searchInput.addEventListener('input', (e) => {
-        renderTable(e.target.value);
-    });
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            renderTable(e.target.value);
+        });
+    }
 
     // Form Listener
-    studentForm.addEventListener('submit', handleFormSubmit);
+    if (studentForm) {
+        studentForm.addEventListener('submit', handleFormSubmit);
+    }
+
+    // Login Listener
+    if (loginForm) {
+        loginForm.addEventListener('submit', handleLogin);
+    }
 });
+
+function checkAuth() {
+    const session = localStorage.getItem('sims_session');
+    if (session) {
+        document.getElementById('view-login').classList.add('hidden');
+        document.getElementById('main-sidebar').classList.remove('hidden');
+        document.getElementById('main-content').classList.remove('hidden');
+        fetchStudents();
+        showView('dashboard');
+    } else {
+        document.getElementById('view-login').classList.remove('hidden');
+        document.getElementById('main-sidebar').classList.add('hidden');
+        document.getElementById('main-content').classList.add('hidden');
+    }
+}
+
+async function handleLogin(e) {
+    e.preventDefault();
+    const username = document.getElementById('login-username').value;
+    const password = document.getElementById('login-password').value;
+    const loginBtn = document.getElementById('login-btn');
+    
+    loginBtn.disabled = true;
+    loginBtn.innerHTML = '<i class="lucide-loader-2 size-4 animate-spin"></i> Authenticating...';
+
+    try {
+        const res = await fetch('/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+        
+        const data = await res.json();
+        
+        if (res.ok && data.success) {
+            localStorage.setItem('sims_session', data.token);
+            showToast('Access Granted. Welcome!', 'success');
+            setTimeout(checkAuth, 1000);
+        } else {
+            showToast(data.message || 'Invalid Credentials', 'error');
+        }
+    } catch (err) {
+        showToast('System Connection Error', 'error');
+    } finally {
+        loginBtn.disabled = false;
+        loginBtn.innerHTML = '<span>Sign In to System</span><i class="lucide-arrow-right size-4"></i>';
+    }
+}
+
+function handleLogout() {
+    localStorage.removeItem('sims_session');
+    showToast('Session terminated successfully', 'success');
+    setTimeout(() => {
+        window.location.reload();
+    }, 1000);
+}
 
 async function fetchStudents() {
     try {

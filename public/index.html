@@ -56,8 +56,51 @@
 </head>
 <body class="h-screen flex overflow-hidden">
 
+    <!-- Login View -->
+    <div id="view-login" class="fixed inset-0 z-[200] bg-[#111827] flex items-center justify-center p-4">
+        <div class="card max-w-sm w-full p-10 space-y-8 bg-white border-none shadow-2xl">
+            <div class="text-center">
+                <div class="w-20 h-20 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-6 transform rotate-3 hover:rotate-0 transition-transform duration-300">
+                    <img src="https://as2.ftcdn.net/v2/jpg/02/19/98/93/1000_F_219989372_K1pBzmbiGfoMd6X5JJd5SYOVIBzSUN8f.jpg" 
+                         alt="Logo" 
+                         class="w-12 h-12 object-contain"
+                         referrerpolicy="no-referrer">
+                </div>
+                <h1 class="text-2xl font-bold text-gray-900 tracking-tight">SIMS Secure Access</h1>
+                <p class="text-sm text-gray-500 mt-2">Enter your administrative credentials</p>
+            </div>
+
+            <form id="login-form" class="space-y-5">
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">Username</label>
+                    <div class="relative">
+                        <i class="lucide-user absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 size-4"></i>
+                        <input type="text" id="login-username" required placeholder="admin" 
+                               class="w-full bg-gray-50 border border-gray-200 pl-10 pr-4 py-3 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
+                    </div>
+                </div>
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">Password</label>
+                    <div class="relative">
+                        <i class="lucide-lock absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 size-4"></i>
+                        <input type="password" id="login-password" required placeholder="••••••••" 
+                               class="w-full bg-gray-50 border border-gray-200 pl-10 pr-4 py-3 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
+                    </div>
+                </div>
+                <button type="submit" id="login-btn" class="w-full btn-primary py-3.5 rounded-xl text-sm font-bold shadow-lg shadow-blue-200 flex items-center justify-center gap-2 group">
+                    <span>Sign In to System</span>
+                    <i class="lucide-arrow-right size-4 group-hover:translate-x-1 transition-transform"></i>
+                </button>
+            </form>
+
+            <div class="text-center pt-4">
+                <p class="text-[10px] text-gray-400 uppercase font-bold tracking-[0.2em]">IT318 Secure Practical Exam Environment</p>
+            </div>
+        </div>
+    </div>
+
     <!-- Sidebar -->
-    <aside class="w-64 bg-[#111827] text-gray-300 flex flex-col z-20">
+    <aside id="main-sidebar" class="hidden w-64 bg-[#111827] text-gray-300 flex flex-col z-20">
         <div class="p-6 border-b border-gray-700">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 overflow-hidden flex items-center justify-center shrink-0">
@@ -83,6 +126,13 @@
                 <i class="lucide-user-plus text-lg"></i>
                 <span class="text-sm font-medium">Add Student</span>
             </button>
+            
+            <div class="pt-4 border-t border-gray-800 mt-4">
+                <button onclick="handleLogout()" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors">
+                    <i class="lucide-log-out text-lg"></i>
+                    <span class="text-sm font-medium">System Logout</span>
+                </button>
+            </div>
         </nav>
 
         <div class="p-6 mt-auto border-t border-gray-800 text-xs text-gray-500">
@@ -95,7 +145,7 @@
     </aside>
 
     <!-- Main Content -->
-    <main class="flex-1 overflow-y-auto relative flex flex-col bg-gray-50">
+    <main id="main-content" class="hidden flex-1 overflow-y-auto relative flex flex-col bg-gray-50">
         <header class="sticky top-0 z-10 bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between">
             <h2 id="view-title" class="text-xl font-bold text-gray-800">Dashboard</h2>
             
@@ -264,6 +314,7 @@
                                     <option value="2">2nd Year</option>
                                     <option value="3">3rd Year</option>
                                     <option value="4">4th Year</option>
+                                    <option value="5">5th Year +</option>
                                 </select>
                             </div>
                         </div>
