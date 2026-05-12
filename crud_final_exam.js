@@ -49,13 +49,17 @@ async function initDb() {
             )
         `);
         
-        // Attempt to add 'section' column if it doesn't exist (for existing tables)
+        // Migration: Ensure 'section' column exists
         try {
-            await pool.execute('ALTER TABLE students ADD COLUMN IF NOT EXISTS section VARCHAR(50) AFTER course');
+            await pool.execute('ALTER TABLE students ADD COLUMN section VARCHAR(50) AFTER course');
+            console.log('Database migrated: Added "section" column.');
         } catch (alterError) {
-            // Some MySQL versions/providers might not support ADD COLUMN IF NOT EXISTS
-            // We'll ignore the error if the column already exists
-            console.log('Note: Section column might already exist or auto-migration not supported by this MySQL version.');
+            // Ignore error 1060 (Duplicate column name)
+            if (alterError.errno === 1060 || alterError.code === 'ER_DUP_FIELDNAME') {
+                console.log('Database check: "section" column already exists.');
+            } else {
+                console.error('Auto-migration for "section" column failed:', alterError.message);
+            }
         }
 
         console.log('MySQL Database initialized successfully');
@@ -63,8 +67,6 @@ async function initDb() {
         console.error('Database initialization failed:', err.message);
     }
 }
-
-initDb();
 
 // --- CRUD API Routes ---
 
@@ -127,6 +129,12 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(publicPath, 'index.html'));
 });
 
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server running on port ${PORT}`);
-});
+async function startServer() {
+    await initDb();
+    
+    app.listen(PORT, '0.0.0.0', () => {
+        console.log(`Server running on port ${PORT}`);
+    });
+}
+
+startServer();
