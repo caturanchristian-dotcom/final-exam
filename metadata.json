@@ -1,0 +1,6 @@
+{
+  "name": "Student Information Management System",
+  "description": "A full-stack Node.js and MySQL application for managing student records, featuring CRUD operations and a professional dashboard interface.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}

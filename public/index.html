@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Information Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.468.0/font/lucide.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;1,500&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; }
+        .serif { font-family: 'Playfair Display', serif; }
+        
+        .active-nav {
+            background-color: #FF6321;
+            color: white;
+            box-shadow: 0 10px 15px -3px rgba(255, 99, 33, 0.2);
+            transform: translateX(8px);
+        }
+
+        /* Hide scrollbar */
+        ::-webkit-scrollbar { width: 0px; background: transparent; }
+    </style>
+</head>
+<body class="bg-[#FDFCFB] text-[#141414] h-screen flex overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-[#141414] text-[#E4E3E0] flex flex-col border-r border-[#141414]">
+        <div class="p-8 border-b border-white/10">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-[#FF6321] rounded-lg flex items-center justify-center">
+                    <i class="lucide-graduation-cap text-white text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-none">SIS Master</h1>
+                    <p class="text-[10px] text-white/50 uppercase tracking-widest mt-1">Management System</p>
+                </div>
+            </div>
+        </div>
+
+        <nav class="flex-1 p-4 space-y-2 mt-4">
+            <button onclick="showView('dashboard')" id="nav-dashboard" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-white/40 hover:text-white hover:bg-white/5 transition-all duration-300">
+                <i class="lucide-layout-dashboard text-lg"></i>
+                <span class="text-sm font-bold tracking-tight">Dashboard</span>
+            </button>
+            <button onclick="showView('list')" id="nav-list" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-white/40 hover:text-white hover:bg-white/5 transition-all duration-300">
+                <i class="lucide-users text-lg"></i>
+                <span class="text-sm font-bold tracking-tight">Student List</span>
+            </button>
+            <button onclick="showView('add')" id="nav-add" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-white/40 hover:text-white hover:bg-white/5 transition-all duration-300">
+                <i class="lucide-user-plus text-lg"></i>
+                <span class="text-sm font-bold tracking-tight">Register Student</span>
+            </button>
+        </nav>
+
+        <div class="p-8 mt-auto border-t border-white/10">
+            <p class="text-[10px] text-white/30 uppercase tracking-widest font-mono">IT318 FINAL EXAM</p>
+            <p class="text-[10px] text-white/50 mt-1">v1.2.0-stable</p>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto relative">
+        <header class="sticky top-0 z-10 bg-white/80 backdrop-blur-md border-b border-[#141414]/5 px-8 py-6 flex items-center justify-between">
+            <h2 id="view-title" class="text-2xl serif italic tracking-tight font-medium">Academic Overview</h2>
+            
+            <div class="flex items-center gap-4 text-right">
+                <div>
+                    <p class="text-xs font-mono text-[#141414]/40 uppercase">Aiven Cloud Status</p>
+                    <div class="flex items-center justify-end gap-1.5 mt-0.5">
+                        <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                        <span class="text-[10px] font-bold tracking-wider uppercase">Secure Connection</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Message Toasts -->
+        <div id="toast" class="hidden fixed top-24 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-full shadow-2xl flex items-center gap-2 border transition-all duration-300">
+            <span id="toast-icon"></span>
+            <span id="toast-message" class="text-sm font-medium"></span>
+        </div>
+
+        <div class="p-8 max-w-6xl mx-auto">
+            
+            <!-- Dashboard View -->
+            <div id="view-dashboard" class="view-content space-y-8">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-2xl border border-[#141414]/10 shadow-sm">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-10 h-10 bg-[#FDFCFB] rounded-xl flex items-center justify-center border border-[#141414]/5">
+                                <i class="lucide-users text-[#FF6321]"></i>
+                            </div>
+                            <span class="text-[10px] font-mono text-[#141414]/30 uppercase font-bold">+12% this semester</span>
+                        </div>
+                        <p class="text-xs font-mono text-[#141414]/40 uppercase tracking-widest">Total Students</p>
+                        <h4 id="stat-total" class="text-2xl font-bold mt-1">0</h4>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl border border-[#141414]/10 shadow-sm">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-10 h-10 bg-[#FDFCFB] rounded-xl flex items-center justify-center border border-[#141414]/5">
+                                <i class="lucide-book-open text-blue-500"></i>
+                            </div>
+                            <span class="text-[10px] font-mono text-[#141414]/30 uppercase font-bold">Expanding</span>
+                        </div>
+                        <p class="text-xs font-mono text-[#141414]/40 uppercase tracking-widest">Active Courses</p>
+                        <h4 id="stat-courses" class="text-2xl font-bold mt-1">0</h4>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl border border-[#141414]/10 shadow-sm">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-10 h-10 bg-[#FDFCFB] rounded-xl flex items-center justify-center border border-[#141414]/5">
+                                <i class="lucide-layers text-purple-500"></i>
+                            </div>
+                            <span class="text-[10px] font-mono text-[#141414]/30 uppercase font-bold">Optimized</span>
+                        </div>
+                        <p class="text-xs font-mono text-[#141414]/40 uppercase tracking-widest">Database Latency</p>
+                        <h4 class="text-2xl font-bold mt-1">24ms</h4>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-[#141414]/10 rounded-2xl p-10 overflow-hidden relative group">
+                    <div class="relative z-10">
+                        <h3 class="text-xl font-bold mb-2">Welcome to your Personal Dashboard</h3>
+                        <p class="text-[#141414]/60 max-w-lg mb-6 leading-relaxed">
+                            Efficiently manage student records, monitor growth, and handle administrative tasks with our high-performance cloud integration.
+                        </p>
+                        <button onclick="showView('add')" class="bg-[#141414] text-white px-6 py-2.5 rounded-full text-sm font-bold flex items-center gap-2 hover:bg-[#FF6321] transition-colors">
+                            Process New Enrollment <i class="lucide-chevron-right text-xs"></i>
+                        </button>
+                    </div>
+                    <div class="absolute top-0 right-0 p-12 opacity-[0.03] -rotate-12 group-hover:scale-110 group-hover:rotate-0 transition-all duration-700 pointer-events-none">
+                        <i class="lucide-graduation-cap text-[240px]"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- List View -->
+            <div id="view-list" class="view-content hidden space-y-6">
+                <div class="flex items-center gap-4 bg-white p-2 rounded-2xl border border-[#141414]/10 shadow-sm max-w-md">
+                    <div class="pl-4 text-[#141414]/40"><i class="lucide-search text-xl"></i></div>
+                    <input 
+                        type="text" 
+                        id="search-input"
+                        placeholder="Search by name, ID or course..." 
+                        class="flex-1 bg-transparent border-none focus:ring-0 py-2 text-sm outline-none"
+                    >
+                </div>
+
+                <div class="bg-white rounded-2xl border border-[#141414]/10 overflow-hidden shadow-sm">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-[#141414] text-white">
+                                <th class="p-4 text-[11px] font-mono uppercase tracking-widest opacity-70">Student ID</th>
+                                <th class="p-4 text-[11px] font-mono uppercase tracking-widest opacity-70">Full Name</th>
+                                <th class="p-4 text-[11px] font-mono uppercase tracking-widest opacity-70">Course</th>
+                                <th class="p-4 text-[11px] font-mono uppercase tracking-widest opacity-70 text-center">Year</th>
+                                <th class="p-4 text-[11px] font-mono uppercase tracking-widest opacity-70">Email</th>
+                                <th class="p-4 text-[11px] font-mono uppercase tracking-widest opacity-70 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="student-table-body">
+                            <!-- Rows injected by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Form View (Add/Edit) -->
+            <div id="view-form" class="view-content hidden max-w-2xl mx-auto">
+                <div class="bg-white rounded-3xl border border-[#141414]/10 p-10 shadow-xl">
+                    <form id="student-form" class="space-y-6">
+                        <input type="hidden" id="edit-id">
+                        <div class="grid grid-cols-2 gap-6">
+                            <div class="space-y-2 group">
+                                <label class="text-[10px] uppercase tracking-widest font-bold text-[#141414]/40 flex items-center gap-1.5 group-focus-within:text-[#FF6321]">
+                                    <i class="lucide-graduation-cap text-sm"></i> Student ID Number
+                                </label>
+                                <input type="text" id="field-student-id" required placeholder="e.g. 2024-10045" class="w-full bg-[#FDFCFB] border border-[#141414]/5 rounded-xl px-4 py-3 text-sm focus:border-[#FF6321] transition-colors outline-none">
+                            </div>
+                            <div class="space-y-2 group">
+                                <label class="text-[10px] uppercase tracking-widest font-bold text-[#141414]/40 flex items-center gap-1.5 group-focus-within:text-[#FF6321]">
+                                    <i class="lucide-user text-sm"></i> Full Academic Name
+                                </label>
+                                <input type="text" id="field-full-name" required placeholder="e.g. Cardo Dalisay" class="w-full bg-[#FDFCFB] border border-[#141414]/5 rounded-xl px-4 py-3 text-sm focus:border-[#FF6321] transition-colors outline-none">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-6">
+                            <div class="space-y-2 group">
+                                <label class="text-[10px] uppercase tracking-widest font-bold text-[#141414]/40 flex items-center gap-1.5 group-focus-within:text-[#FF6321]">
+                                    <i class="lucide-book-open text-sm"></i> Course / Program
+                                </label>
+                                <input type="text" id="field-course" required placeholder="e.g. BS IT" class="w-full bg-[#FDFCFB] border border-[#141414]/5 rounded-xl px-4 py-3 text-sm focus:border-[#FF6321] transition-colors outline-none">
+                            </div>
+                            <div class="space-y-2 group">
+                                <label class="text-[10px] uppercase tracking-widest font-bold text-[#141414]/40 flex items-center gap-1.5 group-focus-within:text-[#FF6321]">
+                                    <i class="lucide-layers text-sm"></i> Year Level
+                                </label>
+                                <select id="field-year-level" class="w-full bg-[#FDFCFB] border border-[#141414]/5 rounded-xl px-4 py-3 text-sm focus:border-[#FF6321] transition-colors outline-none cursor-pointer">
+                                    <option value="1">First Year</option>
+                                    <option value="2">Second Year</option>
+                                    <option value="3">Third Year</option>
+                                    <option value="4">Fourth Year</option>
+                                    <option value="5">Fifth Year +</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2 group">
+                            <label class="text-[10px] uppercase tracking-widest font-bold text-[#141414]/40 flex items-center gap-1.5 group-focus-within:text-[#FF6321]">
+                                <i class="lucide-mail text-sm"></i> Official Email Address
+                            </label>
+                            <input type="email" id="field-email" required placeholder="cardo@university.edu" class="w-full bg-[#FDFCFB] border border-[#141414]/5 rounded-xl px-4 py-3 text-sm focus:border-[#FF6321] transition-colors outline-none">
+                        </div>
+
+                        <div class="pt-6 flex items-center justify-end gap-4">
+                            <button type="button" onclick="showView('list')" class="px-6 py-3 rounded-full text-sm font-bold text-[#141414]/40 hover:text-[#141414]">Cancel</button>
+                            <button type="submit" id="submit-btn" class="bg-[#141414] text-white px-10 py-3 rounded-full font-bold shadow-lg hover:bg-[#FF6321] transition-all">Register Student</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script src="/js/app.js"></script>
+</body>
+</html>
