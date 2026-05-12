@@ -13,10 +13,10 @@ const toastEl = document.getElementById('toast');
 
 // Views mapping
 const views = {
-    dashboard: { id: 'view-dashboard', title: 'Academic Overview' },
-    list: { id: 'view-list', title: 'Student Records' },
-    add: { id: 'view-form', title: 'New Registration', btn: 'Register Student' },
-    edit: { id: 'view-form', title: 'Edit Records', btn: 'Save Changes' }
+    dashboard: { id: 'view-dashboard', title: 'Institutional Dashboard' },
+    list: { id: 'view-list', title: 'Student Records Registry' },
+    add: { id: 'view-form', title: 'New Student Enrollment', btn: 'Register Student' },
+    edit: { id: 'view-form', title: 'Edit Student Information', btn: 'Update Record' }
 };
 
 // Initialize
@@ -85,28 +85,37 @@ function renderTable(filter = '') {
         s.course.toLowerCase().includes(filter.toLowerCase())
     );
 
+    document.getElementById('result-count').textContent = filtered.length;
+
     tableBody.innerHTML = filtered.length > 0 ? filtered.map(student => `
-        <tr class="border-b border-[#141414]/5 hover:bg-[#FDFCFB] group transition-colors">
-            <td class="p-4 font-mono text-sm">${student.student_id}</td>
-            <td class="p-4 font-bold">${student.full_name}</td>
-            <td class="p-4 text-sm text-[#141414]/70">${student.course}</td>
-            <td class="p-4 text-center">
-                <span class="bg-[#FDFCFB] border border-[#141414]/10 px-2.5 py-0.5 rounded-full text-xs font-bold">L${student.year_level}</span>
+        <tr class="hover:bg-gray-50 transition-colors">
+            <td class="px-6 py-4">
+                <span class="text-sm font-semibold text-gray-900">${student.student_id}</span>
             </td>
-            <td class="p-4 text-sm text-[#141414]/50">${student.email_address}</td>
-            <td class="p-4 text-right flex items-center justify-end gap-2">
-                <button onclick="editStudent(${student.id})" class="p-2 text-[#141414]/40 hover:text-[#141414] hover:bg-[#141414]/5 rounded-lg">
-                    <i class="lucide-edit-2 text-sm"></i>
+            <td class="px-6 py-4">
+                <div class="text-sm font-bold text-gray-900">${student.full_name}</div>
+                <div class="text-xs text-gray-500">${student.course}</div>
+            </td>
+            <td class="px-6 py-4">
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-100 uppercase tracking-wider">
+                    L${student.year_level}
+                </span>
+            </td>
+            <td class="px-6 py-4 text-sm text-gray-500 font-medium">${student.email_address}</td>
+            <td class="px-6 py-4 text-right space-x-1">
+                <button onclick="editStudent(${student.id})" class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all" title="Edit">
+                    <i class="lucide-edit-2 size-4"></i>
                 </button>
-                <button onclick="deleteStudent(${student.id})" class="p-2 text-red-200 hover:text-red-600 hover:bg-red-50 rounded-lg">
-                    <i class="lucide-trash-2 text-sm"></i>
+                <button onclick="deleteStudent(${student.id})" class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all" title="Delete">
+                    <i class="lucide-trash-2 size-4"></i>
                 </button>
             </td>
         </tr>
     `).join('') : `
         <tr>
-            <td colspan="6" class="p-20 text-center text-[#141414]/30">
-                <p class="font-serif italic text-lg">No records found</p>
+            <td colspan="5" class="py-20 text-center text-gray-400">
+                <i class="lucide-search size-10 mx-auto mb-3 opacity-20"></i>
+                <p class="text-sm">No students found matching your search</p>
             </td>
         </tr>
     `;
@@ -176,21 +185,21 @@ async function deleteStudent(id) {
 }
 
 function showToast(message, type) {
-    toastEl.classList.remove('hidden', 'bg-green-50', 'bg-red-50', 'text-green-700', 'text-red-700', 'border-green-200', 'border-red-200');
+    toastEl.classList.remove('hidden', 'bg-white', 'bg-red-50', 'text-gray-900', 'text-red-700', 'border-gray-200', 'border-red-200');
     
     if (type === 'success') {
-        toastEl.classList.add('bg-green-50', 'text-green-700', 'border-green-200');
-        document.getElementById('toast-icon').innerHTML = '<i class="lucide-check-circle-2 text-sm"></i>';
+        toastEl.classList.add('bg-white', 'text-gray-900', 'border-gray-200');
+        document.getElementById('toast-icon').innerHTML = '<i class="lucide-check-circle-2 text-green-500 size-5"></i>';
     } else {
         toastEl.classList.add('bg-red-50', 'text-red-700', 'border-red-200');
-        document.getElementById('toast-icon').innerHTML = '<i class="lucide-alert-circle text-sm"></i>';
+        document.getElementById('toast-icon').innerHTML = '<i class="lucide-alert-circle text-red-500 size-5"></i>';
     }
 
     document.getElementById('toast-message').textContent = message;
     
     // Animate in
     toastEl.style.opacity = '0';
-    toastEl.style.transform = 'translate(-50%, -20px)';
+    toastEl.style.transform = 'translate(-50%, -10px)';
     setTimeout(() => {
         toastEl.style.opacity = '1';
         toastEl.style.transform = 'translate(-50%, 0)';
@@ -198,6 +207,7 @@ function showToast(message, type) {
 
     setTimeout(() => {
         toastEl.style.opacity = '0';
+        toastEl.style.transform = 'translate(-50%, -10px)';
         setTimeout(() => toastEl.classList.add('hidden'), 300);
     }, 3000);
 }
