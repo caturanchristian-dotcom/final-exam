@@ -82,7 +82,8 @@ function renderTable(filter = '') {
     const filtered = students.filter(s => 
         s.full_name.toLowerCase().includes(filter.toLowerCase()) ||
         s.student_id.toLowerCase().includes(filter.toLowerCase()) ||
-        s.course.toLowerCase().includes(filter.toLowerCase())
+        s.course.toLowerCase().includes(filter.toLowerCase()) ||
+        (s.section && s.section.toLowerCase().includes(filter.toLowerCase()))
     );
 
     document.getElementById('result-count').textContent = filtered.length;
@@ -94,7 +95,12 @@ function renderTable(filter = '') {
             </td>
             <td class="px-6 py-4">
                 <div class="text-sm font-bold text-gray-900">${student.full_name}</div>
-                <div class="text-xs text-gray-500">${student.course}</div>
+            </td>
+            <td class="px-6 py-4">
+                <div class="text-xs font-medium text-gray-600 bg-gray-100 px-2 py-1 rounded inline-block uppercase">${student.course}</div>
+            </td>
+            <td class="px-6 py-4">
+                <span class="text-sm text-gray-700 font-mono">${student.section || '---'}</span>
             </td>
             <td class="px-6 py-4">
                 <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-100 uppercase tracking-wider">
@@ -102,18 +108,22 @@ function renderTable(filter = '') {
                 </span>
             </td>
             <td class="px-6 py-4 text-sm text-gray-500 font-medium">${student.email_address}</td>
-            <td class="px-6 py-4 text-right space-x-1">
-                <button onclick="editStudent(${student.id})" class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all" title="Edit">
-                    <i class="lucide-edit-2 size-4"></i>
-                </button>
-                <button onclick="deleteStudent(${student.id})" class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all" title="Delete">
-                    <i class="lucide-trash-2 size-4"></i>
-                </button>
+            <td class="px-6 py-4 text-right">
+                <div class="flex items-center justify-end gap-2">
+                    <button onclick="editStudent(${student.id})" class="flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-md transition-all border border-blue-100" title="Edit">
+                        <i class="lucide-edit-2 size-3"></i>
+                        <span>EDIT</span>
+                    </button>
+                    <button onclick="deleteStudent(${student.id})" class="flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-md transition-all border border-red-100" title="Delete">
+                        <i class="lucide-trash-2 size-3"></i>
+                        <span>DROP</span>
+                    </button>
+                </div>
             </td>
         </tr>
     `).join('') : `
         <tr>
-            <td colspan="5" class="py-20 text-center text-gray-400">
+            <td colspan="7" class="py-20 text-center text-gray-400">
                 <i class="lucide-search size-10 mx-auto mb-3 opacity-20"></i>
                 <p class="text-sm">No students found matching your search</p>
             </td>
@@ -128,6 +138,7 @@ async function handleFormSubmit(e) {
         student_id: document.getElementById('field-student-id').value,
         full_name: document.getElementById('field-full-name').value,
         course: document.getElementById('field-course').value,
+        section: document.getElementById('field-section').value,
         year_level: parseInt(document.getElementById('field-year-level').value),
         email_address: document.getElementById('field-email').value
     };
@@ -163,26 +174,56 @@ function editStudent(id) {
     document.getElementById('field-student-id').value = student.student_id;
     document.getElementById('field-full-name').value = student.full_name;
     document.getElementById('field-course').value = student.course;
+    document.getElementById('field-section').value = student.section || '';
     document.getElementById('field-year-level').value = student.year_level;
     document.getElementById('field-email').value = student.email_address;
     
     showView('edit');
 }
 
+let studentToDelete = null;
+
 async function deleteStudent(id) {
-    if (!confirm('Permanently delete this student record?')) return;
+    studentToDelete = id;
+    const modal = document.getElementById('delete-modal');
+    const box = document.getElementById('delete-modal-box');
+    
+    modal.classList.remove('hidden');
+    setTimeout(() => {
+        box.classList.remove('scale-95', 'opacity-0');
+        box.classList.add('scale-100', 'opacity-100');
+    }, 10);
+}
+
+function closeDeleteModal() {
+    const modal = document.getElementById('delete-modal');
+    const box = document.getElementById('delete-modal-box');
+    
+    box.classList.remove('scale-100', 'opacity-100');
+    box.classList.add('scale-95', 'opacity-0');
+    setTimeout(() => {
+        modal.classList.add('hidden');
+        studentToDelete = null;
+    }, 300);
+}
+
+document.getElementById('confirm-delete-btn').addEventListener('click', async () => {
+    if (!studentToDelete) return;
+    
     try {
-        const res = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+        const res = await fetch(`${API_URL}/${studentToDelete}`, { method: 'DELETE' });
         if (res.ok) {
-            showToast('Record deleted', 'success');
+            showToast('Student successfully dropped', 'success');
+            closeDeleteModal();
             fetchStudents();
         } else {
-            showToast('Delete failed', 'error');
+            const err = await res.json();
+            showToast(err.error || 'Drop operation failed', 'error');
         }
     } catch (err) {
-        showToast('Connection error', 'error');
+        showToast('System connection error', 'error');
     }
-}
+});
 
 function showToast(message, type) {
     toastEl.classList.remove('hidden', 'bg-white', 'bg-red-50', 'text-gray-900', 'text-red-700', 'border-gray-200', 'border-red-200');

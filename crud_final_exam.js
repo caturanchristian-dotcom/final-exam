@@ -42,11 +42,22 @@ async function initDb() {
                 student_id VARCHAR(50) NOT NULL UNIQUE,
                 full_name VARCHAR(255) NOT NULL,
                 course VARCHAR(100) NOT NULL,
+                section VARCHAR(50),
                 year_level INT NOT NULL,
                 email_address VARCHAR(255) NOT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         `);
+        
+        // Attempt to add 'section' column if it doesn't exist (for existing tables)
+        try {
+            await pool.execute('ALTER TABLE students ADD COLUMN IF NOT EXISTS section VARCHAR(50) AFTER course');
+        } catch (alterError) {
+            // Some MySQL versions/providers might not support ADD COLUMN IF NOT EXISTS
+            // We'll ignore the error if the column already exists
+            console.log('Note: Section column might already exist or auto-migration not supported by this MySQL version.');
+        }
+
         console.log('MySQL Database initialized successfully');
     } catch (err) {
         console.error('Database initialization failed:', err.message);
@@ -59,11 +70,11 @@ initDb();
 
 // Create Student
 app.post('/api/students', async (req, res) => {
-    const { student_id, full_name, course, year_level, email_address } = req.body;
+    const { student_id, full_name, course, section, year_level, email_address } = req.body;
     try {
         const [result] = await pool.execute(
-            'INSERT INTO students (student_id, full_name, course, year_level, email_address) VALUES (?, ?, ?, ?, ?)',
-            [student_id, full_name, course, year_level, email_address]
+            'INSERT INTO students (student_id, full_name, course, section, year_level, email_address) VALUES (?, ?, ?, ?, ?, ?)',
+            [student_id, full_name, course, section, year_level, email_address]
         );
         res.status(201).json({ id: result.insertId, message: 'Student registered successfully' });
     } catch (error) {
@@ -85,11 +96,11 @@ app.get('/api/students', async (req, res) => {
 
 // Update Student
 app.put('/api/students/:id', async (req, res) => {
-    const { student_id, full_name, course, year_level, email_address } = req.body;
+    const { student_id, full_name, course, section, year_level, email_address } = req.body;
     try {
         await pool.execute(
-            'UPDATE students SET student_id = ?, full_name = ?, course = ?, year_level = ? , email_address = ? WHERE id = ?',
-            [student_id, full_name, course, year_level, email_address, req.params.id]
+            'UPDATE students SET student_id = ?, full_name = ?, course = ?, section = ?, year_level = ? , email_address = ? WHERE id = ?',
+            [student_id, full_name, course, section, year_level, email_address, req.params.id]
         );
         res.json({ message: 'Student updated successfully' });
     } catch (error) {
